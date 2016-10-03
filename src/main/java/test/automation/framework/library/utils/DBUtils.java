@@ -26,8 +26,8 @@ import org.apache.commons.lang3.StringUtils;
 public class DBUtils {
 	/* Variables */
 	private static DBUtils dbutils = new DBUtils();
-	public static final String rowColumnSeparator = "\\|";
-	public static final String columnValueSeparator = "\\=";
+	public static final String rowColumnSeparator = "@@@@";
+	public static final String columnValueSeparator = "::::";
 	public static final String nullValueRepresent = "++NULL++";
 
 	/* Constructors */
@@ -330,10 +330,14 @@ public class DBUtils {
 
 	/**
 	 * 
-	 * @param aut result set 1 in form of HashMap Integer, String 
-	 * @param baseline result set 2 in form of HashMap Integer, String 
-	 * @param ignoreColumns List of Columns which need to be ignored for comparison
-	 * @return HashMap String, Object with keys as match, reasons, recordsMissingInAUT, recordsMissingInBaseline
+	 * @param aut
+	 *            result set 1 in form of HashMap Integer, String
+	 * @param baseline
+	 *            result set 2 in form of HashMap Integer, String
+	 * @param ignoreColumns
+	 *            List of Columns which need to be ignored for comparison
+	 * @return HashMap String, Object with keys as match, reasons,
+	 *         recordsMissingInAUT, recordsMissingInBaseline
 	 */
 	public HashMap<String, Object> compareQueryResults(HashMap<Integer, String> aut, HashMap<Integer, String> baseline,
 			String... ignoreColumns) {
@@ -361,7 +365,7 @@ public class DBUtils {
 			compareResults.put("reasons", reasons);
 			return compareResults;
 		} else if (aut != null && baseline == null) {
-			match = new Boolean(true);
+			match = new Boolean(false);
 			reasons.add("Aut is not null and baseline is null.");
 			compareResults.put("match", match);
 			compareResults.put("reasons", reasons);
@@ -411,7 +415,7 @@ public class DBUtils {
 			boolean flag = false;
 			String[] oneRowAUT = aut.get(i).split(rowColumnSeparator);
 			for (int j = 1; j <= baseline.size(); j++) {
-				String[] oneRowBaseline = baseline.get(i).split(rowColumnSeparator);
+				String[] oneRowBaseline = baseline.get(j).split(rowColumnSeparator);
 				if (Arrays.asList(oneRowAUT).containsAll(Arrays.asList(oneRowBaseline))
 						&& Arrays.asList(oneRowBaseline).containsAll(Arrays.asList(oneRowAUT))) {
 					flag = true;
@@ -427,7 +431,7 @@ public class DBUtils {
 			boolean flag = false;
 			String[] oneRowBaseline = baseline.get(i).split(rowColumnSeparator);
 			for (int j = 1; j <= aut.size(); j++) {
-				String[] oneRowAUT = aut.get(i).split(rowColumnSeparator);
+				String[] oneRowAUT = aut.get(j).split(rowColumnSeparator);
 				if (Arrays.asList(oneRowAUT).containsAll(Arrays.asList(oneRowBaseline))
 						&& Arrays.asList(oneRowBaseline).containsAll(Arrays.asList(oneRowAUT))) {
 					flag = true;
@@ -450,7 +454,8 @@ public class DBUtils {
 		}
 
 		if (match)
-			reasons.add("Both aut and baseline result set are perfect match.");
+			reasons.add("Both aut and baseline result set are perfect match. [Aut-" + aut.size() + ", Baseline-"
+					+ baseline.size() + "]");
 
 		compareResults.put("match", match);
 		compareResults.put("reasons", reasons);
