@@ -25,19 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 
 public class DBUtils {
 	/* Variables */
-	private static DBUtils dbutils = new DBUtils();
 	public static final String rowColumnSeparator = "@@@@";
 	public static final String columnValueSeparator = "::::";
 	public static final String nullValueRepresent = "++NULL++";
-
-	/* Constructors */
-	private DBUtils() {
-	}
-
-	/* Getters and Setters */
-	public static DBUtils getInstance() {
-		return dbutils;
-	}
 
 	/* Functions */
 	/**
@@ -51,7 +41,7 @@ public class DBUtils {
 	 * @throws SQLException
 	 * @throws ClassNotFoundException
 	 */
-	private Connection establishConnection(String connString, String connDriver)
+	private static Connection establishConnection(String connString, String connDriver)
 			throws ClassNotFoundException, SQLException {
 		Class.forName(connDriver);
 		return DriverManager.getConnection(connString);
@@ -85,7 +75,7 @@ public class DBUtils {
 	 * @return HashMap<Integer, String>
 	 * @throws Exception
 	 */
-	public HashMap<Integer, String> executeQuery(String connString, String connDriver, String sqlQuery,
+	public static HashMap<Integer, String> executeQuery(String connString, String connDriver, String sqlQuery,
 			Object... params) throws Exception {
 		HashMap<Integer, String> results = new HashMap<>();
 		PreparedStatement statement = null;
@@ -169,7 +159,7 @@ public class DBUtils {
 	 * @return HashMap<Integer, String>
 	 * @throws Exception
 	 */
-	public HashMap<Integer, String> executeQueryValues(String connString, String connDriver, String sqlQuery,
+	public static HashMap<Integer, String> executeQueryValues(String connString, String connDriver, String sqlQuery,
 			Object... params) throws Exception {
 		HashMap<Integer, String> results = new HashMap<>();
 		PreparedStatement statement = null;
@@ -234,7 +224,7 @@ public class DBUtils {
 	 * @return Number of Rows Updated
 	 * @throws Exception
 	 */
-	public int executeUpdateInsert(String connString, String connDriver, String sqlQuery, Object... params)
+	public static int executeUpdateInsert(String connString, String connDriver, String sqlQuery, Object... params)
 			throws Exception {
 		int recordsUpdated = 0;
 		Connection connection = establishConnection(connString, connDriver);
@@ -265,7 +255,7 @@ public class DBUtils {
 	 *            as HashMap Integer, String
 	 * @return List of HashMap String, String
 	 */
-	public List<HashMap<String, String>> getResultSetAsLHM(HashMap<Integer, String> resultSet) {
+	public static List<HashMap<String, String>> getResultSetAsLHM(HashMap<Integer, String> resultSet) {
 		List<HashMap<String, String>> results = new ArrayList<HashMap<String, String>>();
 		for (int i = 1; i <= resultSet.size(); i++) {
 			HashMap<String, String> oneRow = new HashMap<>();
@@ -283,7 +273,7 @@ public class DBUtils {
 	 *            as List of HashMap
 	 * @return HashMap
 	 */
-	public HashMap<Integer, String> getResultSetAsHM(List<HashMap<String, String>> resultSet) {
+	public static HashMap<Integer, String> getResultSetAsHM(List<HashMap<String, String>> resultSet) {
 		HashMap<Integer, String> results = new HashMap<Integer, String>();
 		int cnt = 1;
 		for (HashMap<String, String> iterable_element : resultSet) {
@@ -307,7 +297,7 @@ public class DBUtils {
 	 *            split in DBUtils Column_Name to Column Value)
 	 * @return HashMap Integer, String filtered by the conditions
 	 */
-	public HashMap<Integer, String> filterResultsCondition(HashMap<Integer, String> results, String... conditions) {
+	public static HashMap<Integer, String> filterResultsCondition(HashMap<Integer, String> results, String... conditions) {
 		if (conditions.length > 0 && conditions != null) {
 			HashMap<Integer, String> newResults = new HashMap<>();
 			int recordCntr = 1;
@@ -339,7 +329,7 @@ public class DBUtils {
 	 * @return HashMap String, Object with keys as match, reasons,
 	 *         recordsMissingInAUT, recordsMissingInBaseline
 	 */
-	public HashMap<String, Object> compareQueryResults(HashMap<Integer, String> aut, HashMap<Integer, String> baseline,
+	public static HashMap<String, Object> compareQueryResults(HashMap<Integer, String> aut, HashMap<Integer, String> baseline,
 			String... ignoreColumns) {
 		HashMap<String, Object> compareResults = new HashMap<>();
 		boolean match = true;
