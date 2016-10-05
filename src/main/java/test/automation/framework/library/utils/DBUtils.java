@@ -454,4 +454,150 @@ public class DBUtils {
 
 		return compareResults;
 	}
+
+	/**
+	 * executeProcOrFunc
+	 * 
+	 * @param connString
+	 * @param connDriver
+	 * @param sqlQuery
+	 * @param params
+	 * @return
+	 * @throws Exception
+	 */
+	public static HashMap<Integer, String> executeProcOrFunc(String connString, String connDriver, String sqlQuery,
+			Object... params) throws Exception {
+		HashMap<Integer, String> results = new HashMap<>();
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		ResultSetMetaData resultSetMetaData = null;
+		int totalColumns = 0;
+
+		Connection connection = establishConnection(connString, connDriver);
+
+		try {
+			statement = connection.prepareCall(sqlQuery);
+			if (params != null && params.length > 0) {
+				int cnt = 1;
+				for (Object object : params) {
+					if (object != null) {
+						statement.setObject(cnt++, object);
+					} else {
+						statement.setNull(cnt++, Types.NULL);
+					}
+				}
+			}
+			resultSet = statement.executeQuery();
+			resultSetMetaData = resultSet.getMetaData();
+			totalColumns = resultSetMetaData.getColumnCount();
+
+			while (resultSet.next()) {
+				String row = "";
+				for (int i = 1; i <= totalColumns; i++) {
+					if (resultSet.getObject(i) == null)
+						row += resultSetMetaData.getColumnName(i) + columnValueSeparator + nullValueRepresent
+								+ rowColumnSeparator;
+					else
+						row += resultSetMetaData.getColumnName(i) + columnValueSeparator + resultSet.getString(i)
+								+ rowColumnSeparator;
+				}
+				row = row.substring(0, (row.length() - 1));
+				results.put(resultSet.getRow(), row);
+			}
+
+		} catch (SQLException e) {
+
+		} finally {
+			resultSet.close();
+			resultSet = null;
+			statement.close();
+			statement = null;
+			connection.close();
+			connection = null;
+		}
+
+		return results;
+	}
+
+	/**
+	 * 
+	 * <b>executeProcOrFuncValues</b><br>
+	 * <br>
+	 * public HashMap<Integer, String> executeQueryValues(String connString,
+	 * String connDriver, String sqlQuery, Object...params) <br>
+	 * <br>
+	 * This function executes the sql query for a provided connection jdbc
+	 * string <br>
+	 * and provided driver (eg - com.microsoft.sqlserver.jdbc.SQLServerDriver)
+	 * <br>
+	 * and returns the results in the form of HashMap<Integer, String> <br>
+	 * where Integer identifies the row number and String contains the
+	 * concatenated <br>
+	 * row (ColumnValue1|ColumnValue2). <br>
+	 * Row number starts from 1. This function does not return the ColumnNames
+	 * <br>
+	 * <br>
+	 * 
+	 * @param connString
+	 *            - jdbc connection string
+	 * @param connDriver
+	 *            - Driver for the connection string (eg- SQLServer driver)
+	 * @param sqlQuery
+	 *            - String
+	 * @param params
+	 *            optional prepared statement parameters
+	 * @return HashMap<Integer, String>
+	 * @throws Exception
+	 */
+	public static HashMap<Integer, String> executeProcOrFuncValues(String connString, String connDriver, String sqlQuery,
+			Object... params) throws Exception {
+		HashMap<Integer, String> results = new HashMap<>();
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		ResultSetMetaData resultSetMetaData = null;
+		int totalColumns = 0;
+
+		Connection connection = establishConnection(connString, connDriver);
+
+		try {
+			statement = connection.prepareCall(sqlQuery);
+			if (params != null && params.length > 0) {
+				int cnt = 1;
+				for (Object object : params) {
+					if (object != null) {
+						statement.setObject(cnt++, object);
+					} else {
+						statement.setNull(cnt++, Types.NULL);
+					}
+				}
+			}
+			resultSet = statement.executeQuery(sqlQuery);
+			resultSetMetaData = resultSet.getMetaData();
+			totalColumns = resultSetMetaData.getColumnCount();
+
+			while (resultSet.next()) {
+				String row = "";
+				for (int i = 1; i <= totalColumns; i++) {
+					if (resultSet.getObject(i) == null)
+						row += nullValueRepresent + rowColumnSeparator;
+					else
+						row += resultSet.getString(i) + rowColumnSeparator;
+				}
+				row = row.substring(0, (row.length() - 1));
+				results.put(resultSet.getRow(), row);
+			}
+
+		} catch (SQLException e) {
+
+		} finally {
+			resultSet.close();
+			resultSet = null;
+			statement.close();
+			statement = null;
+			connection.close();
+			connection = null;
+		}
+
+		return results;
+	}
 }
