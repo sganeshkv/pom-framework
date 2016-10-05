@@ -362,7 +362,7 @@ public class DBUtils {
 			return compareResults;
 		}
 
-		if (ignoreColumns.length == 1 && ignoreColumns != null) {
+		if (ignoreColumns.length >= 1 && ignoreColumns != null) {
 			HashMap<Integer, String> autNew = new HashMap<>();
 			HashMap<Integer, String> baselineNew = new HashMap<>();
 
