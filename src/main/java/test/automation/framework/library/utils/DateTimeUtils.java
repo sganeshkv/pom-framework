@@ -6,6 +6,10 @@ import java.util.Date;
 
 public class DateTimeUtils {
 	public static Date convertStringtoDate(String date, String sourceDateFormat) throws ParseException {
+		return new SimpleDateFormat(sourceDateFormat).parse(date);
+	}
+	
+	public static Date convertStringtoDate(String date) throws ParseException {
 		return new SimpleDateFormat().parse(date);
 	}
 	
