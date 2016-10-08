@@ -10,7 +10,10 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -349,8 +352,7 @@ public class ExcelUtils {
 				if (newHashMap.equals(fullConditions))
 					return row.getRowNum();
 			} else {
-				// TODO - Apply logic for comparing 1.0 and 1
-				if (newHashMap.equals(fullConditions))
+				if (compareHashMapLoosely(newHashMap, fullConditions))
 					return row.getRowNum();
 			}
 		}
@@ -410,5 +412,32 @@ public class ExcelUtils {
 		workbook.close();
 		fis.close();
 		return value;
+	}
+
+	private static boolean compareHashMapLoosely(LinkedHashMap<String, String> one, LinkedHashMap<String, String> two) {
+		Set<String> keySetOne = one.keySet();
+		Set<String> keySetTwo = two.keySet();
+
+		if (!CollectionUtils.isEqualCollection(keySetOne, keySetTwo))
+			return false;
+		for (String col1 : keySetOne) {
+			for (String col2 : keySetTwo) {
+				if (col1.equalsIgnoreCase(col2)) {
+					// Numeric Logic
+					if (NumberUtils.isNumber(one.get(col1)) && NumberUtils.isNumber(two.get(col2))) {
+						if (Double.valueOf(one.get(col1)).doubleValue() != Double.valueOf(two.get(col2)).doubleValue())
+							return false;
+					}
+					// Ignore case and trim
+					else if (StringUtils.isAlphanumeric(one.get(col1)) && StringUtils.isAlphanumeric(two.get(col2))) {
+						if (!one.get(col1).trim().equalsIgnoreCase(two.get(col2).trim())) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		return true;
 	}
 }
