@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -439,5 +440,42 @@ public class ExcelUtils {
 		}
 
 		return true;
+	}
+
+	public static ArrayList<Object> getEntireColumnData(String excelPath, String sheetname, int columnIndex)
+			throws IOException {
+		ArrayList<Object> data = new ArrayList<>();
+		Sheet sheet = getSheetOfWorkbook(excelPath, sheetname);
+		for (Row row : sheet) {
+			data.add(getCellValue(row.getCell(columnIndex)));
+		}
+		return data;
+	}
+
+	public static ArrayList<Object> getEntireColumnData(String excelPath, String sheetname, String columnName)
+			throws IOException {
+		ArrayList<Object> data = new ArrayList<>();
+		data.addAll(getEntireColumnData(excelPath, sheetname, getColumnIndex(getSheetOfWorkbook(excelPath, sheetname),columnName)));
+		return data;
+	}
+
+	private static Workbook getExcelWorkbook(String excelPath) throws IOException {
+		Workbook workbook = null;
+		FileInputStream fis = null;
+		File excel = new File(excelPath);
+
+		if (!excel.exists())
+			throw new FileNotFoundException("No such file exists at - " + excel.getCanonicalPath());
+
+		if (excel.getName().contains(".xlsx"))
+			workbook = new XSSFWorkbook(fis);
+		else
+			workbook = new HSSFWorkbook(fis);
+
+		return workbook;
+	}
+
+	private static Sheet getSheetOfWorkbook(String excelPath, String sheetName) throws IOException {
+		return getExcelWorkbook(excelPath).getSheet(sheetName);
 	}
 }
