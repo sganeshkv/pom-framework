@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,6 +33,8 @@ public class ExcelUtils {
 
 	private static final String ConditionSeparator = ";";
 	private static final String ConditionValueSeparator = "=";
+	private static final String ColumnSeparator = "@@@@";
+	private static final String ColumnValueSeparator = "::::";
 
 	/**
 	 * <b>createExcel - Creates Excel</b>
@@ -362,6 +366,8 @@ public class ExcelUtils {
 							return false;
 						}
 					}
+
+					// TODO - Logic to be added for dateformat comparisons
 				}
 			}
 		}
@@ -407,5 +413,50 @@ public class ExcelUtils {
 
 	private static Sheet getSheetOfWorkbook(String excelPath, String sheetName) throws IOException {
 		return getExcelWorkbook(excelPath).getSheet(sheetName);
+	}
+
+	public static HashMap<Integer, Object> getExcelSheetData(String excelPath, String sheetname,
+			boolean... columnHeaderPresent) throws IOException {
+		HashMap<Integer, Object> data = new HashMap<>();
+		boolean headersPresent = (columnHeaderPresent != null && columnHeaderPresent.length >= 1)
+				? (columnHeaderPresent[0]) : false;
+		Workbook workbook = getExcelWorkbook(excelPath);
+		Sheet sheet = workbook.getSheet(sheetname);
+		ArrayList<String> columnNames = new ArrayList<>();
+		int cnt = 0;
+
+		for (Row row : sheet) {
+			String values = "";
+			for (Cell cell : row) {
+				if ((row.getRowNum() == 0) && (!headersPresent)) {
+					values += String.valueOf(getCellValue(cell)) + ColumnSeparator;
+				} else if ((row.getRowNum() == 0) && headersPresent) {
+					columnNames.add(String.valueOf(getCellValue(cell)));
+					values += String.valueOf(getCellValue(cell)) + ColumnSeparator;
+				} else if ((row.getRowNum() != 0) && (!headersPresent)) {
+					values += String.valueOf(getCellValue(cell)) + ColumnSeparator;
+				} else if ((row.getRowNum() != 0) && (headersPresent)) {
+					values += columnNames.get(cell.getColumnIndex()) + ColumnValueSeparator
+							+ String.valueOf(getCellValue(cell)) + ColumnSeparator;
+				}
+			}
+			values = values.substring(0, (values.length() - 1));
+			data.put(++cnt, values);
+		}
+		data.remove(0);
+		workbook.close();
+		return data;
+	}
+	
+	public static List<HashMap<Integer, Object>> getExcelData(String excelPath) throws IOException {
+		List<HashMap<Integer, Object>> data = new ArrayList<HashMap<Integer, Object>>();
+		Workbook workbook = getExcelWorkbook(excelPath);
+		
+		for (Sheet sheet : workbook) {
+			data.add(getExcelSheetData(excelPath, sheet.getSheetName()));
+		}
+		
+		workbook.close();
+		return data;
 	}
 }
