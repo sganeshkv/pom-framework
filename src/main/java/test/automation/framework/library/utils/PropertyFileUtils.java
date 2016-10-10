@@ -20,6 +20,7 @@ public class PropertyFileUtils {
 		Properties tempProp = new Properties();
 		tempProp.load(inStream);
 		setProperties(tempProp);
+		inStream.close();
 	}
 	
 	/* Getters and Setters */

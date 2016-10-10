@@ -1,10 +1,19 @@
 package test.automation.dummy;
 
 
-import test.automation.framework.library.utils.ExcelUtils;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.PageFactory;
+import org.testng.annotations.Test;
+
+import test.automation.application.pages.MainPage;
 
 public class DummyTestClass {
-	public static void main(String[] args) throws Exception {
-		System.out.println(ExcelUtils.getExcelSheetDataValues("one.xlsx", "Sheet1", true));
+	@Test
+	public void test() {
+		System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
+		WebDriver driver = new ChromeDriver();
+		MainPage mp = PageFactory.initElements(driver, MainPage.class);
+		mp.openPage();
 	}
 }

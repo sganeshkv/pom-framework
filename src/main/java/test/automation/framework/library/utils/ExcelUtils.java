@@ -93,6 +93,12 @@ public class ExcelUtils {
 		return flag;
 	}
 
+	/**
+	 * 
+	 * @param workbook
+	 * @param sheetname
+	 * @return
+	 */
 	private static boolean doesWorkbookContainSheet(Workbook workbook, String sheetname) {
 		boolean flag = false;
 		for (Sheet sheet : workbook) {
@@ -346,6 +352,12 @@ public class ExcelUtils {
 		return value;
 	}
 
+	/**
+	 * 
+	 * @param one
+	 * @param two
+	 * @return
+	 */
 	private static boolean compareHashMapLoosely(LinkedHashMap<String, String> one, LinkedHashMap<String, String> two) {
 		Set<String> keySetOne = one.keySet();
 		Set<String> keySetTwo = two.keySet();
@@ -375,6 +387,14 @@ public class ExcelUtils {
 		return true;
 	}
 
+	/**
+	 * 
+	 * @param excelPath
+	 * @param sheetname
+	 * @param columnIndex
+	 * @return
+	 * @throws IOException
+	 */
 	public static ArrayList<Object> getEntireColumnData(String excelPath, String sheetname, int columnIndex)
 			throws IOException {
 		ArrayList<Object> data = new ArrayList<>();
@@ -385,6 +405,14 @@ public class ExcelUtils {
 		return data;
 	}
 
+	/**
+	 * 
+	 * @param excelPath
+	 * @param sheetname
+	 * @param columnName
+	 * @return
+	 * @throws IOException
+	 */
 	public static ArrayList<Object> getEntireColumnData(String excelPath, String sheetname, String columnName)
 			throws IOException {
 		ArrayList<Object> data = new ArrayList<>();
@@ -394,6 +422,11 @@ public class ExcelUtils {
 		return data;
 	}
 	
+	/**
+	 * @param excelPath
+	 * @return
+	 * @throws IOException
+	 */
 	private static Workbook getExcelWorkbook(String excelPath) throws IOException {
 		Workbook workbook = null;
 		FileInputStream fis = null;
@@ -411,10 +444,24 @@ public class ExcelUtils {
 		return workbook;
 	}
 
+	/**
+	 * @param excelPath
+	 * @param sheetName
+	 * @return
+	 * @throws IOException
+	 */
 	private static Sheet getSheetOfWorkbook(String excelPath, String sheetName) throws IOException {
 		return getExcelWorkbook(excelPath).getSheet(sheetName);
 	}
 
+	/**
+	 * 
+	 * @param excelPath
+	 * @param sheetname
+	 * @param columnHeaderPresent
+	 * @return
+	 * @throws IOException
+	 */
 	public static HashMap<Integer, Object> getExcelSheetData(String excelPath, String sheetname,
 			boolean... columnHeaderPresent) throws IOException {
 		HashMap<Integer, Object> data = new HashMap<>();
@@ -456,6 +503,14 @@ public class ExcelUtils {
 		return data;
 	}
 
+	/**
+	 * 
+	 * @param excelPath
+	 * @param sheetname
+	 * @param columnHeaderPresent
+	 * @return
+	 * @throws IOException
+	 */
 	public static HashMap<Integer, Object> getExcelSheetDataValues(String excelPath, String sheetname,
 			boolean... columnHeaderPresent) throws IOException {
 		HashMap<Integer, Object> data = new HashMap<>();
@@ -494,6 +549,12 @@ public class ExcelUtils {
 		return data;
 	}
 
+	/**
+	 * 
+	 * @param excelPath
+	 * @return
+	 * @throws IOException
+	 */
 	public static List<HashMap<Integer, Object>> getExcelData(String excelPath) throws IOException {
 		List<HashMap<Integer, Object>> data = new ArrayList<HashMap<Integer, Object>>();
 		Workbook workbook = getExcelWorkbook(excelPath);
@@ -506,6 +567,13 @@ public class ExcelUtils {
 		return data;
 	}
 	
+	/**
+	 * @param sheet
+	 * @param filterCondition
+	 * @param strictCompare
+	 * @return
+	 * @throws IOException
+	 */
 	private static int[] getRowIndices(Sheet sheet, String filterCondition, boolean strictCompare) throws IOException {
 		ArrayList<Integer> list = new ArrayList<>();
 		String[] conditions = filterCondition.split(ConditionSeparator);
@@ -542,8 +610,15 @@ public class ExcelUtils {
 		return ArrayUtils.toPrimitive(list.toArray(new Integer[list.size()]));
 	}
 	
-
-
+	/**
+	 * 
+	 * @param excelPath
+	 * @param sheetname
+	 * @param filterConditions
+	 * @param strictCompareFlag
+	 * @return
+	 * @throws IOException
+	 */
 	public static HashMap<Integer, Object> getExcelSheetData(String excelPath, String sheetname, String filterConditions
 			, boolean...strictCompareFlag) throws IOException {
 		HashMap<Integer, Object> data = new HashMap<>();
@@ -567,7 +642,16 @@ public class ExcelUtils {
 		workbook.close();
 		return data;
 	}
-	
+
+	/**
+	 * 
+	 * @param excelPath
+	 * @param sheetname
+	 * @param filterConditions
+	 * @param strictCompareFlag
+	 * @return
+	 * @throws IOException
+	 */
 	public static HashMap<Integer, Object> getExcelSheetDataValues(String excelPath, String sheetname, String filterConditions
 			, boolean...strictCompareFlag) throws IOException {
 		HashMap<Integer, Object> data = new HashMap<>();
