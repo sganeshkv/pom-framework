@@ -15,7 +15,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -26,7 +25,6 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelUtils {
@@ -126,40 +124,18 @@ public class ExcelUtils {
 	public static Object getCellValue(String excelPath, String sheetname, int rownum, int columnnum)
 			throws IOException {
 		Object value = null;
-		Workbook workbook = null;
+		Workbook workbook = getExcelWorkbook(excelPath);
+		Sheet sheet = workbook.getSheet(sheetname);
 		Cell cell = null;
-		File excelPath_f = new File(excelPath);
-		FileInputStream fis = null;
 
-		if (!excelPath_f.exists())
-			throw new FileNotFoundException("File does not exist - " + excelPath);
-
-		fis = new FileInputStream(excelPath_f);
-
-		if (excelPath_f.getName().contains(".xlsx")) {
-			workbook = new XSSFWorkbook(fis);
-			XSSFSheet sheet = ((XSSFWorkbook) workbook).getSheet(sheetname);
-			try {
-				cell = sheet.getRow(rownum).getCell(columnnum);
-			} catch (NullPointerException e) {
-				workbook.close();
-				fis.close();
-				return null;
-			}
-		} else {
-			workbook = new HSSFWorkbook(fis);
-			HSSFSheet sheet = ((HSSFWorkbook) workbook).getSheet(sheetname);
-			try {
-				cell = sheet.getRow(rownum).getCell(columnnum);
-			} catch (NullPointerException e) {
-				workbook.close();
-				fis.close();
-				return null;
-			}
+		try {
+			cell = sheet.getRow(rownum).getCell(columnnum);
+		} catch (NullPointerException e) {
+			workbook.close();
+			return null;
 		}
 		value = getCellValue(cell);
 		workbook.close();
-		fis.close();
 		return value;
 	}
 
@@ -220,49 +196,23 @@ public class ExcelUtils {
 	 */
 	public static void setCellValue(String excelPath, String sheetName, int rowNum, int columnNum, Object valueToSet)
 			throws IOException, ParseException {
-		Workbook workbook = null;
+		Workbook workbook = getExcelWorkbook(excelPath);
+		Sheet sheet = workbook.getSheet(sheetName);
 		Cell cell = null;
 		File excelPath_f = new File(excelPath);
-		FileInputStream fis = null;
 		FileOutputStream fos = null;
 
-		if (!excelPath_f.exists())
-			throw new FileNotFoundException("File does not exist - " + excelPath);
-
-		fis = new FileInputStream(excelPath_f);
-
-		if (excelPath_f.getName().contains(".xlsx")) {
-			workbook = new XSSFWorkbook(fis);
-			XSSFSheet sheet = ((XSSFWorkbook) workbook).getSheet(sheetName);
-			try {
-				if (sheet.getRow(rowNum) == null)
-					cell = sheet.createRow(rowNum).createCell(columnNum);
-				else if (sheet.getRow(rowNum).getCell(columnNum) == null) {
-					cell = sheet.getRow(rowNum).createCell(columnNum);
-				} else {
-					cell = sheet.getRow(rowNum).getCell(columnNum);
-				}
-			} catch (NullPointerException e) {
-				workbook.close();
-				fis.close();
-				return;
+		try {
+			if (sheet.getRow(rowNum) == null)
+				cell = sheet.createRow(rowNum).createCell(columnNum);
+			else if (sheet.getRow(rowNum).getCell(columnNum) == null) {
+				cell = sheet.getRow(rowNum).createCell(columnNum);
+			} else {
+				cell = sheet.getRow(rowNum).getCell(columnNum);
 			}
-		} else {
-			workbook = new HSSFWorkbook(fis);
-			HSSFSheet sheet = ((HSSFWorkbook) workbook).getSheet(sheetName);
-			try {
-				if (sheet.getRow(rowNum) == null)
-					cell = sheet.createRow(rowNum).createCell(columnNum);
-				else if (sheet.getRow(rowNum).getCell(columnNum) == null) {
-					cell = sheet.getRow(rowNum).createCell(columnNum);
-				} else {
-					cell = sheet.getRow(rowNum).getCell(columnNum);
-				}
-			} catch (NullPointerException e) {
-				workbook.close();
-				fis.close();
-				return;
-			}
+		} catch (NullPointerException e) {
+			workbook.close();
+			return;
 		}
 
 		if (valueToSet != null) {
@@ -298,7 +248,6 @@ public class ExcelUtils {
 		fos = new FileOutputStream(excelPath_f);
 		workbook.write(fos);
 		workbook.close();
-		fis.close();
 		fos.close();
 	}
 
@@ -376,42 +325,20 @@ public class ExcelUtils {
 				: false;
 
 		Object value = null;
-		Workbook workbook = null;
+		Workbook workbook = getExcelWorkbook(excelPath);
+		Sheet sheet = workbook.getSheet(sheetName);
 		Cell cell = null;
-		File excelPath_f = new File(excelPath);
-		FileInputStream fis = null;
 
-		if (!excelPath_f.exists())
-			throw new FileNotFoundException("File does not exist - " + excelPath);
-
-		fis = new FileInputStream(excelPath_f);
-
-		if (excelPath_f.getName().contains(".xlsx")) {
-			workbook = new XSSFWorkbook(fis);
-			XSSFSheet sheet = ((XSSFWorkbook) workbook).getSheet(sheetName);
-			try {
-				cell = sheet.getRow(getRowIndex(sheet, filterCondition, strictCompare))
-						.getCell(getColumnIndex(sheet, columnName));
-			} catch (NullPointerException e) {
-				workbook.close();
-				fis.close();
-				return null;
-			}
-		} else {
-			workbook = new HSSFWorkbook(fis);
-			HSSFSheet sheet = ((HSSFWorkbook) workbook).getSheet(sheetName);
-			try {
-				cell = sheet.getRow(getRowIndex(sheet, filterCondition, strictCompare))
-						.getCell(getColumnIndex(sheet, columnName));
-			} catch (NullPointerException e) {
-				workbook.close();
-				fis.close();
-				return null;
-			}
+		try {
+			cell = sheet.getRow(getRowIndex(sheet, filterCondition, strictCompare))
+					.getCell(getColumnIndex(sheet, columnName));
+		} catch (NullPointerException e) {
+			workbook.close();
+			return null;
 		}
+
 		value = getCellValue(cell);
 		workbook.close();
-		fis.close();
 		return value;
 	}
 
@@ -455,7 +382,9 @@ public class ExcelUtils {
 	public static ArrayList<Object> getEntireColumnData(String excelPath, String sheetname, String columnName)
 			throws IOException {
 		ArrayList<Object> data = new ArrayList<>();
-		data.addAll(getEntireColumnData(excelPath, sheetname, getColumnIndex(getSheetOfWorkbook(excelPath, sheetname),columnName)));
+		data.addAll(getEntireColumnData(excelPath, sheetname,
+				getColumnIndex(getSheetOfWorkbook(excelPath, sheetname), columnName)));
+		data.remove(0);
 		return data;
 	}
 
@@ -466,12 +395,13 @@ public class ExcelUtils {
 
 		if (!excel.exists())
 			throw new FileNotFoundException("No such file exists at - " + excel.getCanonicalPath());
-
+		fis = new FileInputStream(excel);
 		if (excel.getName().contains(".xlsx"))
 			workbook = new XSSFWorkbook(fis);
 		else
 			workbook = new HSSFWorkbook(fis);
 
+		fis.close();
 		return workbook;
 	}
 
