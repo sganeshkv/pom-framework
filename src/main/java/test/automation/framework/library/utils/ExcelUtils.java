@@ -393,7 +393,7 @@ public class ExcelUtils {
 		data.remove(0);
 		return data;
 	}
-
+	
 	private static Workbook getExcelWorkbook(String excelPath) throws IOException {
 		Workbook workbook = null;
 		FileInputStream fis = null;
@@ -423,7 +423,6 @@ public class ExcelUtils {
 		Workbook workbook = getExcelWorkbook(excelPath);
 		Sheet sheet = workbook.getSheet(sheetname);
 		ArrayList<String> columnNames = new ArrayList<>();
-		int cnt = 0;
 
 		for (Row row : sheet) {
 			String values = "";
@@ -441,19 +440,152 @@ public class ExcelUtils {
 				}
 			}
 			values = values.substring(0, (values.length() - 1));
-			data.put(++cnt, values);
+			data.put(row.getRowNum(), values);
 		}
-		data.remove(0);
+		if (headersPresent)
+			data.remove(0);
+		else {
+			HashMap<Integer, Object> newData = new HashMap<>();
+			for (int x = 0; x < data.size(); x++) {
+				newData.put((x + 1), data.get(x));
+			}
+			data = newData;
+		}
+
+		workbook.close();
+		return data;
+	}
+
+	public static HashMap<Integer, Object> getExcelSheetDataValues(String excelPath, String sheetname,
+			boolean... columnHeaderPresent) throws IOException {
+		HashMap<Integer, Object> data = new HashMap<>();
+		boolean headersPresent = (columnHeaderPresent != null && columnHeaderPresent.length >= 1)
+				? (columnHeaderPresent[0]) : false;
+		Workbook workbook = getExcelWorkbook(excelPath);
+		Sheet sheet = workbook.getSheet(sheetname);
+		
+		for (Row row : sheet) {
+			String values = "";
+			for (Cell cell : row) {
+				if ((row.getRowNum() == 0) && (!headersPresent)) {
+					values += String.valueOf(getCellValue(cell)) + ColumnSeparator;
+				} else if ((row.getRowNum() == 0) && headersPresent) {
+					values += String.valueOf(getCellValue(cell)) + ColumnSeparator;
+				} else if ((row.getRowNum() != 0) && (!headersPresent)) {
+					values += String.valueOf(getCellValue(cell)) + ColumnSeparator;
+				} else if ((row.getRowNum() != 0) && (headersPresent)) {
+					values += String.valueOf(getCellValue(cell)) + ColumnSeparator;
+				}
+			}
+			values = values.substring(0, (values.length() - 1));
+			data.put(row.getRowNum(), values);
+		}
+		if (headersPresent)
+			data.remove(0);
+		else {
+			HashMap<Integer, Object> newData = new HashMap<>();
+			for (int x = 0; x < data.size(); x++) {
+				newData.put((x + 1), data.get(x));
+			}
+			data = newData;
+		}
+
+		workbook.close();
+		return data;
+	}
+
+	public static List<HashMap<Integer, Object>> getExcelData(String excelPath) throws IOException {
+		List<HashMap<Integer, Object>> data = new ArrayList<HashMap<Integer, Object>>();
+		Workbook workbook = getExcelWorkbook(excelPath);
+
+		for (Sheet sheet : workbook) {
+			data.add(getExcelSheetData(excelPath, sheet.getSheetName()));
+		}
+
 		workbook.close();
 		return data;
 	}
 	
-	public static List<HashMap<Integer, Object>> getExcelData(String excelPath) throws IOException {
-		List<HashMap<Integer, Object>> data = new ArrayList<HashMap<Integer, Object>>();
-		Workbook workbook = getExcelWorkbook(excelPath);
+	private static int[] getRowIndices(Sheet sheet, String filterCondition, boolean strictCompare) throws IOException {
+		ArrayList<Integer> list = new ArrayList<>();
+		String[] conditions = filterCondition.split(ConditionSeparator);
+		LinkedHashMap<String, String> fullConditions = new LinkedHashMap<String, String>();
+		for (String condition : conditions) {
+			fullConditions.put(condition.split(ConditionValueSeparator)[0],
+					condition.split(ConditionValueSeparator)[1]);
+		}
+		int[] columnIndices = new int[fullConditions.size()];
+		Set<String> columnNames = fullConditions.keySet();
+		for (String columnName : columnNames) {
+			columnIndices = ArrayUtils.add(columnIndices, getColumnIndex(sheet, columnName));
+			columnIndices = ArrayUtils.remove(columnIndices, 0);
+		}
+
+		for (Row row : sheet) {
+			LinkedHashMap<String, String> newHashMap = new LinkedHashMap<>();
+			for (int index : columnIndices) {
+				newHashMap.put(String.valueOf(getCellValue(sheet.getRow(0).getCell(index))),
+						String.valueOf(getCellValue(row.getCell(index))));
+			}
+			if (strictCompare) {
+				if (newHashMap.equals(fullConditions))
+					list.add(row.getRowNum());
+			} else {
+				if (compareHashMapLoosely(newHashMap, fullConditions))
+					list.add(row.getRowNum());
+			}
+		}
 		
-		for (Sheet sheet : workbook) {
-			data.add(getExcelSheetData(excelPath, sheet.getSheetName()));
+		if(list.size()==0)
+			list.add(-1);
+
+		return ArrayUtils.toPrimitive(list.toArray(new Integer[list.size()]));
+	}
+	
+
+
+	public static HashMap<Integer, Object> getExcelSheetData(String excelPath, String sheetname, String filterConditions
+			, boolean...strictCompareFlag) throws IOException {
+		HashMap<Integer, Object> data = new HashMap<>();
+		boolean strictCompare = (strictCompareFlag != null && strictCompareFlag.length >= 1) ? strictCompareFlag[0]
+				: false;		
+		Workbook workbook = getExcelWorkbook(excelPath);
+		Sheet sheet = workbook.getSheet(sheetname);
+		int cnt=1;
+		int[] targetRowIndices = getRowIndices(sheet, filterConditions, strictCompare);
+		
+		if(targetRowIndices.length==1 && targetRowIndices[0]==-1) {
+			return data;
+		}
+		else {
+			HashMap<Integer, Object> newData = getExcelSheetData(excelPath, sheetname, true);
+			for (int i : targetRowIndices) {
+				data.put(cnt++, newData.get(i));
+			}
+		}
+		
+		workbook.close();
+		return data;
+	}
+	
+	public static HashMap<Integer, Object> getExcelSheetDataValues(String excelPath, String sheetname, String filterConditions
+			, boolean...strictCompareFlag) throws IOException {
+		HashMap<Integer, Object> data = new HashMap<>();
+		boolean strictCompare = (strictCompareFlag != null && strictCompareFlag.length >= 1) ? strictCompareFlag[0]
+				: false;		
+		Workbook workbook = getExcelWorkbook(excelPath);
+		Sheet sheet = workbook.getSheet(sheetname);
+		int cnt=1;
+		int[] targetRowIndices = getRowIndices(sheet, filterConditions, strictCompare);
+		
+		if(targetRowIndices.length==1 && targetRowIndices[0]==-1) {
+			return data;
+		}
+		else {
+			HashMap<Integer, Object> newData = getExcelSheetDataValues(excelPath, sheetname, true);
+			for (int i : targetRowIndices) {
+				data.put(cnt++, newData.get(i));
+			}
 		}
 		
 		workbook.close();
