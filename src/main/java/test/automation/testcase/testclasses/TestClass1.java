@@ -8,7 +8,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
 import test.automation.framework.driver.Driver;
-import test.automation.framework.library.utils.BrowserType;
+import test.automation.framework.library.utils.BrowserTypes;
 import test.automation.framework.library.utils.UIUtils;
 
 public class TestClass1 {
@@ -21,8 +21,8 @@ public class TestClass1 {
 	}
 
 	@Test
-	public void test() throws IOException {
-		WebDriver driver = UIUtils.getWebDriver(testSuiteDriver.getEnvironmentUrl(), BrowserType.CHROME);
+	public void test() throws Exception {
+		WebDriver driver = UIUtils.getWebDriver(testSuiteDriver.getEnvironmentUrl(), BrowserTypes.CHROME, false);
 		UIUtils.waitForPageLoad(driver,60);
 		driver.quit();
 	}

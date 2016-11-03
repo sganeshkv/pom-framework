@@ -1,5 +1,5 @@
 package test.automation.framework.library.utils;
 
-public enum BrowserType {
-	CHROME, FIREFOX, IE
+public enum BrowserTypes {
+	CHROME, IE, FIREFOX
 }

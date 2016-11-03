@@ -1,6 +1,7 @@
 package test.automation.framework.library.utils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
@@ -11,8 +12,12 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.BrowserType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.security.UserAndPassword;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -66,25 +71,36 @@ public class UIUtils {
 	 * @param executablePath
 	 *            - Set null in case of FireFoxDriver less than 3.0
 	 * @return WebDriver
+	 * @throws MalformedURLException
 	 */
-	public static WebDriver getWebDriver(String url, BrowserType browserType) {
+	public static WebDriver getWebDriver(String url, BrowserTypes browserType, boolean executeInGrid)
+			throws MalformedURLException {
 		WebDriver driver = null;
+		DesiredCapabilities dc = null;
 
 		switch (browserType) {
 		case CHROME:
 			System.setProperty("webdriver.chrome.driver", getConfig().getPropValue("ChromeDriverPath"));
-			driver = new ChromeDriver();
+			dc = DesiredCapabilities.chrome();
+			ChromeOptions options = new ChromeOptions();
+			options.addArguments("test-type");
+			dc.setBrowserName(BrowserType.CHROME);
+			dc.setCapability(ChromeOptions.CAPABILITY, options);
+			driver = executeInGrid ? new RemoteWebDriver(new URL(url), dc) : new ChromeDriver(dc);
 			break;
 		case FIREFOX:
 			if (!StringUtils.isEmpty(getConfig().getPropValue("FirefoxDriverPath")))
 				System.setProperty("webdriver.firefox.driver", getConfig().getPropValue("FirefoxDriverPath"));
-			driver = new FirefoxDriver();
-			break;
-		case IE:
-			System.setProperty("webdriver.ie.driver", getConfig().getPropValue("InternetExplorerDriverPath"));
-			driver = new InternetExplorerDriver();
+			dc = DesiredCapabilities.firefox();
+			dc.setBrowserName(BrowserType.FIREFOX);
+			driver = executeInGrid ? new RemoteWebDriver(new URL(url), dc) : new FirefoxDriver(dc);
 			break;
 		default:
+		case IE:
+			System.setProperty("webdriver.ie.driver", getConfig().getPropValue("InternetExplorerDriverPath"));
+			dc = DesiredCapabilities.internetExplorer();
+			dc.setBrowserName(BrowserType.IE);
+			driver = executeInGrid ? new RemoteWebDriver(new URL(url), dc) : new InternetExplorerDriver(dc);
 			break;
 		}
 
@@ -95,8 +111,8 @@ public class UIUtils {
 		return driver;
 	}
 
-	public static WebDriver getWebDriver(URL url, BrowserType browserType) {
-		return getWebDriver(url.getPath(), browserType);
+	public static WebDriver getWebDriver(URL url, BrowserTypes browserType, boolean executeInGrid) throws MalformedURLException {
+		return getWebDriver(url.getPath(), browserType, executeInGrid);
 	}
 
 	public static Object executeScript(WebDriver driver, String script, Object... args) {
