@@ -1,5 +1,6 @@
 package test.automation.framework.library.utils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +22,10 @@ public class PropertyFileUtils {
 		tempProp.load(inStream);
 		setProperties(tempProp);
 		inStream.close();
+	}
+	
+	public PropertyFileUtils(File propertyFile) throws IOException {
+		this(propertyFile.getAbsolutePath());
 	}
 	
 	/* Getters and Setters */

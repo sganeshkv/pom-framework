@@ -1,14 +1,18 @@
 package test.automation.framework.library.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -111,7 +115,8 @@ public class UIUtils {
 		return driver;
 	}
 
-	public static WebDriver getWebDriver(URL url, BrowserTypes browserType, boolean executeInGrid) throws MalformedURLException {
+	public static WebDriver getWebDriver(URL url, BrowserTypes browserType, boolean executeInGrid)
+			throws MalformedURLException {
 		return getWebDriver(url.getPath(), browserType, executeInGrid);
 	}
 
@@ -237,5 +242,15 @@ public class UIUtils {
 
 	public static boolean waitForPageLoad(WebDriver driver) {
 		return waitForPageLoad(driver, defaultWaitTime);
+	}
+	
+	public static void takeScreenshot(WebDriver driver, String filepath) throws IOException {
+		takeScreenshot(driver, new File(filepath));
+	}
+	
+	public static void takeScreenshot(WebDriver driver, File filepath) throws IOException {
+		if(!filepath.getParentFile().exists())
+			filepath.getParentFile().mkdirs();
+		FileUtils.moveFile(((TakesScreenshot) (driver)).getScreenshotAs(OutputType.FILE), filepath);
 	}
 }
